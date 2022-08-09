@@ -1,18 +1,21 @@
 package other.service;
 
+
+import edu.fudan.common.entity.Seat;
 import edu.fudan.common.util.Response;
 import org.springframework.http.HttpHeaders;
-import other.entity.*;
+import other.entity.Order;
+import other.entity.QueryInfo;
+import other.entity.OrderAlterInfo;
 
 import java.util.Date;
-import java.util.UUID;
 
 /**
  * @author fdse
  */
 public interface OrderOtherService {
 
-    Response findOrderById(UUID id, HttpHeaders headers);
+    Response findOrderById(String id, HttpHeaders headers);
 
     Response create(Order newOrder, HttpHeaders headers);
 
@@ -20,7 +23,7 @@ public interface OrderOtherService {
 
     Response saveChanges(Order order, HttpHeaders headers);
 
-    Response cancelOrder(UUID accountId, UUID orderId, HttpHeaders headers);
+    Response cancelOrder(String accountId, String orderId, HttpHeaders headers);
 
     Response addNewOrder(Order order, HttpHeaders headers);
 

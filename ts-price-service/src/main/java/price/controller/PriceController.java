@@ -10,6 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import price.entity.PriceConfig;
 import price.service.PriceService;
+
+import java.util.List;
+import java.util.Map;
+
 import static org.springframework.http.ResponseEntity.ok;
 
 /**
@@ -32,32 +36,39 @@ public class PriceController {
     @GetMapping(value = "/prices/{routeId}/{trainType}")
     public HttpEntity query(@PathVariable String routeId, @PathVariable String trainType,
                             @RequestHeader HttpHeaders headers) {
-        PriceController.LOGGER.info("Query price, RouteId: {}, TrainType: {}",routeId,trainType);
+        PriceController.LOGGER.info("[findByRouteIdAndTrainType][Query price][RouteId: {}, TrainType: {}]",routeId,trainType);
         return ok(service.findByRouteIdAndTrainType(routeId, trainType, headers));
+    }
+
+    @PostMapping(value = "/prices/byRouteIdsAndTrainTypes")
+    public HttpEntity query(@RequestBody List<String> ridsAndTts,
+                            @RequestHeader HttpHeaders headers) {
+        PriceController.LOGGER.info("[findByRouteIdAndTrainType][Query price][routeId and Train Type: {}]", ridsAndTts);
+        return ok(service.findByRouteIdsAndTrainTypes(ridsAndTts, headers));
     }
 
     @GetMapping(value = "/prices")
     public HttpEntity queryAll(@RequestHeader HttpHeaders headers) {
-        PriceController.LOGGER.info("Query all prices");
+        PriceController.LOGGER.info("[findAllPriceConfig][Query all prices]");
         return ok(service.findAllPriceConfig(headers));
     }
 
     @PostMapping(value = "/prices")
     public HttpEntity<?> create(@RequestBody PriceConfig info,
                                 @RequestHeader HttpHeaders headers) {
-        PriceController.LOGGER.info("Create price, RouteId: {}, TrainType: {}",info.getRouteId(),info.getTrainType());
+        PriceController.LOGGER.info("[createNewPriceConfig][Create price][RouteId: {}, TrainType: {}]",info.getRouteId(),info.getTrainType());
         return new ResponseEntity<>(service.createNewPriceConfig(info, headers), HttpStatus.CREATED);
     }
 
-    @DeleteMapping(value = "/prices")
-    public HttpEntity delete(@RequestBody PriceConfig info, @RequestHeader HttpHeaders headers) {
-        PriceController.LOGGER.info("Delete price, PriceConfigId: {}",info.getId());
-        return ok(service.deletePriceConfig(info, headers));
+    @DeleteMapping(value = "/prices/{pricesId}")
+    public HttpEntity delete(@PathVariable String pricesId, @RequestHeader HttpHeaders headers) {
+        PriceController.LOGGER.info("[deletePriceConfig][Delete price][PriceConfigId: {}]",pricesId);
+        return ok(service.deletePriceConfig(pricesId, headers));
     }
 
     @PutMapping(value = "/prices")
     public HttpEntity update(@RequestBody PriceConfig info, @RequestHeader HttpHeaders headers) {
-        PriceController.LOGGER.info("Update price, PriceConfigId: {}",info.getId());
+        PriceController.LOGGER.info("[updatePriceConfig][Update price][PriceConfigId: {}]",info.getId());
         return ok(service.updatePriceConfig(info, headers));
     }
 }

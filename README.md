@@ -14,65 +14,83 @@ You can get more details at [Wiki Pages](https://github.com/FudanSELab/train-tic
 ![architecture](./image/2.png)
 
 ## Quick Start
-We provide two options to quickly deploy our application: [Using Docker Compose](#Using-Docker-Compose) and [Using Kubernetes](#Using-Kubernetes).
-
-### Using Docker Compose
-The easiest way to get start with the Train Ticket application is by using [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/).
-
-> If you don't have Docker and Docker Compose installed, you can refer to [the Docker website](https://www.docker.com/) to install them.
-
-#### Presequisite
-* Docker
-* Docker Compose
-
-#### 1. Clone the Repository
-```bash
-git clone --depth=1 https://github.com/FudanSELab/train-ticket.git
-cd train-ticket/
-```
-
-#### 2. Start the Application
-```bash
-docker-compose -f deployment/docker-compose-manifests/quickstart-docker-compose.yml up
-```
-Once the application starts, you can visit the Train Ticket web page at [http://localhost:8080](http://localhost:8080).
+We provide k8s deployment to quickly deploy our application:  [Using Kubernetes](#Using-Kubernetes).
 
 ### Using Kubernetes
 Here is the steps to deploy the Train Ticket onto any existing Kubernetes cluster.
 
 #### Presequisite
 * An existing Kubernetes cluster
+* Helm supported, you can see https://helm.sh/docs/helm/helm_install/ for helm install
+* PVC supported, you can see https://openebs.io/docs/2.12.x/user-guides/installation for localPV support.
 
 #### 1. Clone the Repository
 ```bash
-git clone --depth=1 https://github.com/FudanSELab/train-ticket.git
+git clone --depth=1 https://github.com/FudanSELab/train-ticket.git 
 cd train-ticket/
 ```
 
 #### 2. Deploy the application
+### For Quick Start
 ```bash
-cd deployment/kubernetes-manifests/quickstart-k8s
+make deploy
 
-# Deploy the databases
-kubectl apply -f quickstart-ts-deployment-part1.yml
-# Deploy the services
-kubectl apply -f quickstart-ts-deployment-part2.yml
-# Deploy the UI Dashboard
-kubectl apply -f quickstart-ts-deployment-part3.yml
+```
+
+Note: if you want specify namespace, set Namespace paramter:
+
+```bash
+make deploy Namespace=yournamespace
+```
+
+### Deploy Mysql Clusters For Each Services
+
+```bash
+make deploy DeployArgs="--independent-db"
+```
+
+### With Moinitorig
+```bash
+make deploy DeployArgs="--with-monitoring"
+```
+
+### With Distributed Tracing
+```bash
+make deploy DeployArgs="--with-tracing"
+```
+
+### Deploy All 
+```bash
+make deploy DeployArgs="--all"
+```
+
+### Customise Deployment
+You can freely combine parameters for custom deployment， for example, deploy with monitoring and tracing:
+
+```bash
+make deploy DeployArgs="--with-tracing --with-monitoring"
+```
+
+### Reset Deployment
+
+```
+make reset-deploy
+# if you specify namespace when deploy, set namespace as well when reset
+# make reset-deploy Namespace=yournamespace
 ```
 
 #### 3. Run `kubectl get pods` to see pods are in a ready state
 
 #### 4. Visit the Train Ticket web page at [http://[Node-IP]:32677](http://[Node-IP]:32677).
 
-### More Deployment Ways
-
-There are many other quick deployment ways in [deployment folder](<https://github.com/FudanSELab/train-ticket/tree/master/deployment>).  For example, you can deploy this system [with Jaeger](<https://github.com/FudanSELab/train-ticket/tree/master/deployment/kubernetes-manifests/k8s-with-jaeger>), and then visit the Jaeger Webpage to view traces.
 
 ## Build From Source
 In the above, We use pre-built images to quickly deploy the application.
 
 If you want to build the application from source, you can refer to [the Installation Guide](https://github.com/FudanSELab/train-ticket/wiki/Installation-Guide).
+
+## test scripts
+Use scripts to test train-ticket: [https://github.com/FudanSELab/train-ticket-auto-query](https://github.com/FudanSELab/train-ticket-auto-query)
 
 ## Screenshot
 ![screenshot](./image/main_interface.png)

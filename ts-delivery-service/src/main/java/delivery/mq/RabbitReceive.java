@@ -37,20 +37,20 @@ public class RabbitReceive {
         Delivery delivery = JsonUtils.json2Object(payload, Delivery.class);
 
         if (delivery == null) {
-            logger.error("Receive delivery object is null, error.");
+            logger.error("[process][json2Object][Receive delivery object is null error]");
             return;
         }
-        logger.info("Receive delivery object:" + delivery);
+        logger.info("[process][Receive delivery object][delivery object: {}]" + delivery);
 
         if (delivery.getId() == null) {
-            delivery.setId(UUID.randomUUID());
+            delivery.setId(UUID.randomUUID().toString());
         }
 
         try {
             deliveryRepository.save(delivery);
-            logger.info("Save delivery object into database success");
+            logger.info("[process][Save delivery object into database success]");
         } catch (Exception e) {
-            logger.error("Save delivery object into database failed, exception [{}]", e.toString());
+            logger.error("[process][deliveryRepository.save][Save delivery object into database failed][exception: {}]", e.toString());
         }
     }
 }

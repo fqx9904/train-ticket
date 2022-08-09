@@ -12,6 +12,9 @@ import edu.fudan.common.util.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,6 +27,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
+import java.util.List;
 
 /**
  * @author fdse
@@ -44,17 +48,24 @@ public class TokenServiceImpl implements TokenService {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private DiscoveryClient discoveryClient;
+
+    private String getServiceUrl(String serviceName) {
+        return "http://" + serviceName;
+    }
+
     @Override
     public Response getToken(BasicAuthDto dto, HttpHeaders headers) throws UserOperationException {
         String username = dto.getUsername();
         String password = dto.getPassword();
         String verifyCode = dto.getVerificationCode();
 //        LOGGER.info("LOGIN USER :" + username + " __ " + password + " __ " + verifyCode);
-
+        String verification_code_service_url = getServiceUrl("ts-verification-code-service");
         if (!StringUtils.isEmpty(verifyCode)) {
             HttpEntity requestEntity = new HttpEntity(headers);
             ResponseEntity<Boolean> re = restTemplate.exchange(
-                    "http://ts-verification-code-service:15678/api/v1/verifycode/verify/" + verifyCode,
+                     verification_code_service_url + "/api/v1/verifycode/verify/" + verifyCode,
                     HttpMethod.GET,
                     requestEntity,
                     Boolean.class);
@@ -62,7 +73,7 @@ public class TokenServiceImpl implements TokenService {
 
             // failed code
             if (!id) {
-                LOGGER.info("Verification failed, userName: {}", username);
+                LOGGER.info("[getToken][Verification failed][userName: {}]", username);
                 return new Response<>(0, "Verification failed.", null);
             }
         }
@@ -72,7 +83,7 @@ public class TokenServiceImpl implements TokenService {
         try {
             authenticationManager.authenticate(upat);
         } catch (AuthenticationException e) {
-            LOGGER.warn("Incorrect username or password, username: {}, password: {}", username, password);
+            LOGGER.warn("[getToken][Incorrect username or password][username: {}, password: {}]", username, password);
             return new Response<>(0, "Incorrect username or password.", null);
         }
 
@@ -81,8 +92,7 @@ public class TokenServiceImpl implements TokenService {
                         InfoConstant.USER_NAME_NOT_FOUND_1, username
                 )));
         String token = jwtProvider.createToken(user);
-        LOGGER.info("USER TOKEN: "+ token);
-        LOGGER.info("USER ID: " + user.getUserId());
+        LOGGER.info("[getToken][success][USER TOKEN: {} USER ID: {}]", token, user.getUserId());
         return new Response<>(1, "login success", new TokenDto(user.getUserId(), username, token));
     }
 }

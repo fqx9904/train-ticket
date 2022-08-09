@@ -40,9 +40,9 @@ public class RabbitReceive {
     @Value("${email_address:trainticket_notify@163.com}")
     String email;
     String username = "username";
-    String startingPlace = "startingPlace";
+    String startPlace = "startPlace";
     String endPlace = "endPlace";
-    String startingTime = "startingTime";
+    String startTime = "startTime";
     String seatClass = "seatClass";
     String seatNumber = "seatNumber";
     String date = "date";
@@ -53,11 +53,11 @@ public class RabbitReceive {
         NotifyInfo info = JsonUtils.json2Object(payload, NotifyInfo.class);
 
         if (info == null) {
-            logger.error("Receive email object is null, error.");
+            logger.error("[process][json2Object][Receive email object is null, error]");
             return;
         }
 
-        logger.info("Receive email object:" + info);
+        logger.info("[process][Receive email object][info: {}]", info);
 
         Mail mail = new Mail();
         mail.setMailFrom(email);
@@ -66,9 +66,9 @@ public class RabbitReceive {
 
         Map<String, Object> model = new HashMap<>();
         model.put(username, info.getUsername());
-        model.put(startingPlace,info.getStartingPlace());
+        model.put(startPlace,info.getStartPlace());
         model.put(endPlace,info.getEndPlace());
-        model.put(startingTime,info.getStartingTime());
+        model.put(startTime,info.getStartTime());
         model.put(date,info.getDate());
         model.put(seatClass,info.getSeatClass());
         model.put(seatNumber,info.getSeatNumber());
@@ -77,15 +77,16 @@ public class RabbitReceive {
 
         try {
             mailService.sendEmail(mail, "preserve_success.ftl");
-            logger.info("Send email to user " + username + " success");
+            logger.info("[process][Send email to user {} success]", username);
             info.setSendStatus(true);
         } catch (Exception e) {
-            logger.error("Send email error: " + e);
+            logger.error("[process][mailService.sendEmail][Send email error][Exception: {}]", e.getMessage());
             info.setSendStatus(false);
         }
 
-        info.setId(UUID.randomUUID());
-        logger.info("Save notify info object [{}] into database", info.getId());
+
+        info.setId(UUID.randomUUID().toString());
+        logger.info("[process][Save notify info object [{}] into database]", info.getId());
         notifyRepository.save(info);
     }
 }

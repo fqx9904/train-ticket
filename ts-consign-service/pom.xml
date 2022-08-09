@@ -15,7 +15,7 @@
         <artifactId>ts-service</artifactId>
         <groupId>org.services</groupId>
         <version>0.1.0</version>
-        <relativePath>../</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <properties>
@@ -26,17 +26,19 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.services</groupId>
             <artifactId>ts-common</artifactId>
             <version>0.1.0</version>
         </dependency>
-
-
     </dependencies>
-
     <build>
         <plugins>
             <plugin>

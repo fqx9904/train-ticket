@@ -1,5 +1,6 @@
 package order.service;
 
+import edu.fudan.common.entity.Seat;
 import edu.fudan.common.util.Response;
 import order.entity.*;
 import org.springframework.http.HttpHeaders;
@@ -12,13 +13,13 @@ import java.util.UUID;
  */
 public interface OrderService {
 
-    Response findOrderById(UUID id, HttpHeaders headers);
+    Response findOrderById(String id, HttpHeaders headers);
 
     Response create(Order newOrder, HttpHeaders headers);
 
     Response saveChanges(Order order, HttpHeaders headers);
 
-    Response cancelOrder(UUID accountId, UUID orderId, HttpHeaders headers);
+    Response cancelOrder(String accountId, String orderId, HttpHeaders headers);
 
     Response queryOrders(OrderInfo qi, String accountId, HttpHeaders headers);
 

@@ -8,27 +8,34 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import org.hibernate.annotations.GenericGenerator;
+
+import javax.persistence.*;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * @author fdse
  */
 @Data
+@GenericGenerator(name = "jpa-uuid", strategy = "org.hibernate.id.UUIDGenerator")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
+@Table(name = "auth_user")
 public class User implements UserDetails {
+    @Id
+    @Column(length=36, name = "user_id")
+    private String userId;
 
-    private UUID userId;
-
+    @Column(length=36, name = "user_name")
     private String username;
 
     private String password;
 
+    @ElementCollection
+    @CollectionTable(joinColumns = @JoinColumn(name = "user_id"))
     private Set<String> roles = new HashSet<>();
 
     @Override

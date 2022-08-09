@@ -14,7 +14,7 @@
         <groupId>org.services</groupId>
         <artifactId>ts-service</artifactId>
         <version>0.1.0</version>
-        <relativePath>../</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
 	<properties>
@@ -28,16 +28,12 @@
 			<artifactId>ts-common</artifactId>
 			<version>0.1.0</version>
 		</dependency>
-
         <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>18.0</version>
+            <version>31.0-jre</version>
         </dependency>
-
-
-
 	</dependencies>
 
 	<build>

@@ -1,7 +1,7 @@
 package admintravel.controller;
 
-import admintravel.entity.TravelInfo;
 import admintravel.service.AdminTravelService;
+import edu.fudan.common.entity.TravelInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,27 +30,27 @@ public class AdminTravelController {
     @CrossOrigin(origins = "*")
     @GetMapping(path = "/admintravel")
     public HttpEntity getAllTravels(@RequestHeader HttpHeaders headers) {
-        logger.info("Get all travels");
+        logger.info("[getAllTravels][Get all travels]");
         return ok(adminTravelService.getAllTravels(headers));
     }
 
     @PostMapping(value = "/admintravel")
     public HttpEntity addTravel(@RequestBody TravelInfo request, @RequestHeader HttpHeaders headers) {
-        logger.info("Add travel, trip id: {}, train type id: {}, form station {} to station {}, login id: {}",
-                request.getTripId(), request.getTrainTypeId(), request.getStartingStationId(), request.getStationsId(), request.getLoginId());
+        logger.info("[addTravel][Add travel][trip id: {}, train type name: {}, form station {} to station {}, login id: {}]",
+                request.getTripId(), request.getTrainTypeName(), request.getStartStationName(), request.getStationsName(), request.getLoginId());
         return ok(adminTravelService.addTravel(request, headers));
     }
 
     @PutMapping(value = "/admintravel")
     public HttpEntity updateTravel(@RequestBody TravelInfo request, @RequestHeader HttpHeaders headers) {
-        logger.info("Update travel, trip id: {}, train type id: {}, form station {} to station {}, login id: {}",
-                request.getTripId(), request.getTrainTypeId(), request.getStartingStationId(), request.getStationsId(), request.getLoginId());
+        logger.info("[updateTravel][Update travel][trip id: {}, train type id: {}, form station {} to station {}, login id: {}]",
+                request.getTripId(), request.getTrainTypeName(), request.getStartStationName(), request.getStationsName(), request.getLoginId());
         return ok(adminTravelService.updateTravel(request, headers));
     }
 
     @DeleteMapping(value = "/admintravel/{tripId}")
     public HttpEntity deleteTravel(@PathVariable String tripId, @RequestHeader HttpHeaders headers) {
-        logger.info("Delete travel: trip id: {}", tripId);
+        logger.info("[deleteTravel][Delete travel][trip id: {}]", tripId);
         return ok(adminTravelService.deleteTravel(tripId, headers));
     }
 

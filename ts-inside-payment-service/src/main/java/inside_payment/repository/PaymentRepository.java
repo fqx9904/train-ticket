@@ -1,9 +1,11 @@
 package inside_payment.repository;
 
 import inside_payment.entity.Payment;
+//import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author fdse
@@ -16,7 +18,7 @@ public interface PaymentRepository extends CrudRepository<Payment,String> {
      * @param id id
      * @return Payment
      */
-    Payment findById(String id);
+    Optional<Payment> findById(String id);
 
     /**
      * find by order id

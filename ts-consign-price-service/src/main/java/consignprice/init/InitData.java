@@ -22,9 +22,9 @@ public class InitData implements CommandLineRunner {
 
     @Override
     public void run(String... strings) throws Exception {
-        InitData.LOGGER.info("[Consign price service] [Init data operation]");
+        InitData.LOGGER.info("[InitData.run][Consign price service][Init data operation]");
         ConsignPrice config = new ConsignPrice();
-        config.setId(UUID.randomUUID());
+        config.setId(UUID.randomUUID().toString());
         config.setIndex(0);
         config.setInitialPrice(8);
         config.setInitialWeight(1);

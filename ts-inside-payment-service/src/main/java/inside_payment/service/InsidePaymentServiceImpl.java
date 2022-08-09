@@ -1,5 +1,7 @@
 package inside_payment.service;
 
+import edu.fudan.common.entity.OrderStatus;
+import edu.fudan.common.entity.Order;
 import edu.fudan.common.util.Response;
 import inside_payment.entity.*;
 import inside_payment.repository.AddMoneyRepository;
@@ -7,6 +9,7 @@ import inside_payment.repository.PaymentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -35,16 +38,22 @@ public class InsidePaymentServiceImpl implements InsidePaymentService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InsidePaymentServiceImpl.class);
 
+    private String getServiceUrl(String serviceName) {
+        return "http://" + serviceName;
+    }
+
     @Override
     public Response pay(PaymentInfo info, HttpHeaders headers) {
 
         String userId = info.getUserId();
 
         String requestOrderURL = "";
+        String order_service_url = getServiceUrl("ts-order-service");
+        String order_other_service_url = getServiceUrl("ts-order-other-service");
         if (info.getTripId().startsWith("G") || info.getTripId().startsWith("D")) {
-            requestOrderURL =  "http://ts-order-service:12031/api/v1/orderservice/order/" + info.getOrderId();
+            requestOrderURL =  order_service_url + "/api/v1/orderservice/order/" + info.getOrderId();
         } else {
-            requestOrderURL = "http://ts-order-other-service:12032/api/v1/orderOtherService/orderOther/" + info.getOrderId();
+            requestOrderURL = order_other_service_url + "/api/v1/orderOtherService/orderOther/" + info.getOrderId();
         }
         HttpEntity requestGetOrderResults = new HttpEntity(headers);
         ResponseEntity<Response<Order>> reGetOrderResults = restTemplate.exchange(
@@ -59,7 +68,7 @@ public class InsidePaymentServiceImpl implements InsidePaymentService {
         if (result.getStatus() == 1) {
             Order order = result.getData();
             if (order.getStatus() != OrderStatus.NOTPAID.getCode()) {
-                InsidePaymentServiceImpl.LOGGER.info("[Inside Payment Service][Pay] Error. Order status Not allowed to Pay.");
+                InsidePaymentServiceImpl.LOGGER.warn("[Inside Payment Service.pay][Order status Not allowed to Pay]");
                 return new Response<>(0, "Error. Order status Not allowed to Pay.", null);
             }
 
@@ -97,14 +106,15 @@ public class InsidePaymentServiceImpl implements InsidePaymentService {
                 /****这里调用第三方支付***/
 
                 HttpEntity requestEntityOutsidePaySuccess = new HttpEntity(outsidePaymentInfo, headers);
+                String payment_service_url = getServiceUrl("ts-payment-service");
                 ResponseEntity<Response> reOutsidePaySuccess = restTemplate.exchange(
-                        "http://ts-payment-service:19001/api/v1/paymentservice/payment",
+                        payment_service_url + "/api/v1/paymentservice/payment",
                         HttpMethod.POST,
                         requestEntityOutsidePaySuccess,
                         Response.class);
                 Response outsidePaySuccess = reOutsidePaySuccess.getBody();
 
-                InsidePaymentServiceImpl.LOGGER.info("Out pay result: {}", outsidePaySuccess.toString());
+                InsidePaymentServiceImpl.LOGGER.info("[Inside Payment Service.pay][outside Pay][Out pay result: {}]", outsidePaySuccess.toString());
                 if (outsidePaySuccess.getStatus() == 1) {
                     payment.setType(PaymentType.O);
                     paymentRepository.save(payment);
@@ -119,11 +129,11 @@ public class InsidePaymentServiceImpl implements InsidePaymentService {
                 payment.setType(PaymentType.P);
                 paymentRepository.save(payment);
             }
-            LOGGER.info("Payment success, orderId: {}", info.getOrderId());
+            LOGGER.info("[Inside Payment Service.pay][Payment success][orderId: {}]", info.getOrderId());
             return new Response<>(1, "Payment Success", null);
 
         } else {
-            LOGGER.error("Payment failed: Order not exists, orderId: {}", info.getOrderId());
+            LOGGER.error("[Inside Payment Service.pay][Payment failed][Order not exists][orderId: {}]", info.getOrderId());
             return new Response<>(0, "Payment Failed, Order Not Exists", null);
         }
     }
@@ -139,7 +149,7 @@ public class InsidePaymentServiceImpl implements InsidePaymentService {
             addMoneyRepository.save(addMoney);
             return new Response<>(1, "Create Account Success", null);
         } else {
-            LOGGER.error("Create Account Failed, Account already Exists, userId: {}", info.getUserId());
+            LOGGER.error("[createAccount][Create Account Failed][Account already Exists][userId: {}]", info.getUserId());
             return new Response<>(0, "Create Account Failed, Account already Exists", null);
         }
     }
@@ -226,7 +236,7 @@ public class InsidePaymentServiceImpl implements InsidePaymentService {
         if (payments != null && !payments.isEmpty()) {
             return new Response<>(1, "Query Payment Success", payments);
         }else {
-            LOGGER.error("Query payment failed");
+            LOGGER.error("[queryPayment][Query payment failed][payment is null]");
             return new Response<>(0, "Query Payment Failed", null);
         }
     }
@@ -241,7 +251,7 @@ public class InsidePaymentServiceImpl implements InsidePaymentService {
             addMoneyRepository.save(addMoney);
             return new Response<>(1, "Draw Back Money Success", null);
         } else {
-            LOGGER.error("Draw Back Money Failed");
+            LOGGER.error("[drawBack][Draw Back Money Failed][addMoneyRepository.findByUserId null][userId: {}]", userId);
             return new Response<>(0, "Draw Back Money Failed", null);
         }
     }
@@ -283,8 +293,9 @@ public class InsidePaymentServiceImpl implements InsidePaymentService {
             outsidePaymentInfo.setPrice(info.getPrice());
 
             HttpEntity requestEntityOutsidePaySuccess = new HttpEntity(outsidePaymentInfo, headers);
+            String payment_service_url = getServiceUrl("ts-payment-service");
             ResponseEntity<Response> reOutsidePaySuccess = restTemplate.exchange(
-                    "http://ts-payment-service:19001/api/v1/paymentservice/payment",
+                    payment_service_url + "/api/v1/paymentservice/payment",
                     HttpMethod.POST,
                     requestEntityOutsidePaySuccess,
                     Response.class);
@@ -295,7 +306,7 @@ public class InsidePaymentServiceImpl implements InsidePaymentService {
                 paymentRepository.save(payment);
                 return new Response<>(1, "Pay Difference Success", null);
             } else {
-                LOGGER.error("Pay Difference Failed, orderId: {}", info.getOrderId());
+                LOGGER.error("[payDifference][Pay Difference Failed][outsidePaySuccess status not 1][orderId: {}]", info.getOrderId());
                 return new Response<>(0, "Pay Difference Failed", null);
             }
         } else {
@@ -311,7 +322,7 @@ public class InsidePaymentServiceImpl implements InsidePaymentService {
         if (monies != null && !monies.isEmpty()) {
             return new Response<>(1, "Query Money Success", null);
         } else {
-            LOGGER.error("Query money failed");
+            LOGGER.error("[queryAddMoney][Query money failed][addMoneyRepository.findAll null]");
             return new Response<>(0, "Query money failed", null);
         }
     }
@@ -324,8 +335,9 @@ public class InsidePaymentServiceImpl implements InsidePaymentService {
         if (tripId.startsWith("G") || tripId.startsWith("D")) {
 
             HttpEntity requestEntityModifyOrderStatusResult = new HttpEntity(headers);
+            String order_service_url = getServiceUrl("ts-order-service");
             ResponseEntity<Response> reModifyOrderStatusResult = restTemplate.exchange(
-                    "http://ts-order-service:12031/api/v1/orderservice/order/status/" + orderId + "/" + orderStatus,
+                    order_service_url + "/api/v1/orderservice/order/status/" + orderId + "/" + orderStatus,
                     HttpMethod.GET,
                     requestEntityModifyOrderStatusResult,
                     Response.class);
@@ -333,8 +345,9 @@ public class InsidePaymentServiceImpl implements InsidePaymentService {
 
         } else {
             HttpEntity requestEntityModifyOrderStatusResult = new HttpEntity(headers);
+            String order_other_service_url = getServiceUrl("ts-order-other-service");
             ResponseEntity<Response> reModifyOrderStatusResult = restTemplate.exchange(
-                    "http://ts-order-other-service:12032/api/v1/orderOtherService/orderOther/status/" + orderId + "/" + orderStatus,
+                    order_other_service_url + "/api/v1/orderOtherService/orderOther/status/" + orderId + "/" + orderStatus,
                     HttpMethod.GET,
                     requestEntityModifyOrderStatusResult,
                     Response.class);
@@ -346,11 +359,11 @@ public class InsidePaymentServiceImpl implements InsidePaymentService {
 
     @Override
     public void initPayment(Payment payment, HttpHeaders headers) {
-        Payment paymentTemp = paymentRepository.findById(payment.getId());
+        Optional<Payment> paymentTemp = paymentRepository.findById(payment.getId());
         if (paymentTemp == null) {
             paymentRepository.save(payment);
         } else {
-            InsidePaymentServiceImpl.LOGGER.error("[Init Payment] Already Exists, paymentId: {}, orderId: {}", payment.getId(), payment.getOrderId());
+            InsidePaymentServiceImpl.LOGGER.error("[initPayment][paymentTemp Already Exists][paymentId: {}, orderId: {}]", payment.getId(), payment.getOrderId());
         }
     }
 

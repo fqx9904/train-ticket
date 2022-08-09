@@ -1,37 +1,47 @@
 package other.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import edu.fudan.common.entity.OrderStatus;
+import edu.fudan.common.entity.SeatClass;
+import edu.fudan.common.util.StringUtils;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.ToString;
+import org.hibernate.annotations.GenericGenerator;
 
+import javax.persistence.*;
 import java.util.Date;
-import java.util.UUID;
 
 /**
  * @author fdse
  */
 @Data
-@Document(collection = "orders")
+@Table(name = "orders_other")
+@Entity
+@GenericGenerator(name = "jpa-uuid", strategy = "org.hibernate.id.UUIDGenerator")
+@ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Order {
-
     @Id
-    private UUID id;
+    @Column(length = 36)
+    @GeneratedValue(generator = "jpa-uuid")
+    private String id;
 
-    private Date boughtDate;
+    private String boughtDate;
 
-    private Date travelDate;
 
-    private Date travelTime;
+    private String travelDate;
+
+
+    private String travelTime;
 
     /**
      * Which Account Bought it
      */
-    private UUID accountId;
+    @Column(length = 36)
+    private String accountId;
 
     /**
-     * Tickets bought for whom
+     * Tickets bought for whom....
      */
     private String contactsName;
 
@@ -47,8 +57,10 @@ public class Order {
 
     private String seatNumber;
 
+    @Column(name = "from_station")
     private String from;
 
+    @Column(name = "to_station")
     private String to;
 
     private int status;
@@ -56,8 +68,8 @@ public class Order {
     private String price;
 
     public Order(){
-        boughtDate = new Date(System.currentTimeMillis());
-        travelDate = new Date(123456789);
+        boughtDate = StringUtils.Date2String(new Date(System.currentTimeMillis()));
+        travelDate = StringUtils.Date2String(new Date(123456789));
         trainNumber = "G1235";
         coachNumber = 5;
         seatClass = SeatClass.FIRSTCLASS.getCode();
@@ -80,9 +92,9 @@ public class Order {
             return false;
         }
         Order other = (Order) obj;
-        return boughtDate.equals(other.getBoughtDate())
-                && travelDate.equals(other.getTravelDate())
-                && travelTime.equals(other.getTravelTime())
+        return getBoughtDate().equals(other.getBoughtDate())
+                && getBoughtDate().equals(other.getTravelDate())
+                && getTravelTime().equals(other.getTravelTime())
                 && accountId .equals( other.getAccountId() )
                 && contactsName.equals(other.getContactsName())
                 && contactsDocumentNumber.equals(other.getContactsDocumentNumber())
@@ -102,11 +114,6 @@ public class Order {
         int result = 17;
         result = 31 * result + (id == null ? 0 : id.hashCode());
         return result;
-    }
-
-    public void setTravelDate(int year,int month,int day){
-        Date date = new Date(year,month,day,0,0,0); //NOSONAR
-        this.travelDate = date;
     }
 
 }

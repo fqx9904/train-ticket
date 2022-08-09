@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.MessageFormat;
 import java.util.*;
@@ -38,7 +39,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAllUser(HttpHeaders headers) {
-        return userRepository.findAll();
+        return (List<User>) userRepository.findAll();
     }
 
     /**
@@ -49,9 +50,9 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User createDefaultAuthUser(AuthDto dto) {
-        LOGGER.info("Register User Info is:  " + dto.getUserName());
+        LOGGER.info("[createDefaultAuthUser][Register User Info][AuthDto name: {}]", dto.getUserName());
         User user = User.builder()
-                .userId(UUID.fromString(dto.getUserId()))
+                .userId(dto.getUserId())
                 .username(dto.getUserName())
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .roles(new HashSet<>(Arrays.asList(AuthConstant.ROLE_USER)))
@@ -59,14 +60,15 @@ public class UserServiceImpl implements UserService {
         try {
             checkUserCreateInfo(user);
         } catch (UserOperationException e) {
-            LOGGER.error("Create default auth user error, message: {}", e.getMessage());
+            LOGGER.error("[createDefaultAuthUser][Create default auth user][UserOperationException][message: {}]", e.getMessage());
         }
         return userRepository.save(user);
     }
 
     @Override
-    public Response deleteByUserId(UUID userId, HttpHeaders headers) {
-        LOGGER.info("DELETE USER :" + userId);
+    @Transactional
+    public Response deleteByUserId(String userId, HttpHeaders headers) {
+        LOGGER.info("[deleteByUserId][DELETE USER][user id: {}]", userId);
         userRepository.deleteByUserId(userId);
         return new Response(1, "DELETE USER SUCCESS", null);
     }
@@ -77,7 +79,7 @@ public class UserServiceImpl implements UserService {
      * @param user
      */
     private void checkUserCreateInfo(User user) throws UserOperationException {
-        LOGGER.info("Check user create info, userId: {}, userName: {}", user.getUserId(), user.getUsername());
+        LOGGER.info("[checkUserCreateInfo][Check user create info][userId: {}, userName: {}]", user.getUserId(), user.getUsername());
         List<String> infos = new ArrayList<>();
 
         if (null == user.getUsername() || "".equals(user.getUsername())) {

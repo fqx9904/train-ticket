@@ -1,6 +1,8 @@
 package travel.service;
 
+import edu.fudan.common.entity.*;
 import edu.fudan.common.util.Response;
+import edu.fudan.common.util.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +16,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 import travel.entity.*;
+import travel.entity.Trip;
 import travel.repository.TripRepository;
 
 import java.util.ArrayList;
@@ -211,7 +214,7 @@ public class TravelServiceImplTest {
         gtdi.setTripId("Z1255");
         gtdi.setFrom("from_station");
         gtdi.setTo("to_station");
-        gtdi.setTravelDate(new Date(System.currentTimeMillis() - 86400000));
+        gtdi.setTravelDate(StringUtils.Date2String(new Date(System.currentTimeMillis() - 86400000)));
 
         Trip trip = new Trip();
         trip.setRouteId("route_id");

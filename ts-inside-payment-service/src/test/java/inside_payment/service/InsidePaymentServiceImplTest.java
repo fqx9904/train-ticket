@@ -1,5 +1,6 @@
 package inside_payment.service;
 
+import edu.fudan.common.entity.Order;
 import edu.fudan.common.util.Response;
 import inside_payment.entity.*;
 import inside_payment.repository.AddMoneyRepository;
@@ -199,7 +200,7 @@ public class InsidePaymentServiceImplTest {
     @Test
     public void testInitPayment2() {
         Payment payment = new Payment();
-        Mockito.when(paymentRepository.findById(Mockito.anyString())).thenReturn(payment);
+        Mockito.when(paymentRepository.findById(Mockito.anyString()).get()).thenReturn(payment);
         Mockito.when(paymentRepository.save(Mockito.any(Payment.class))).thenReturn(null);
         insidePaymentServiceImpl.initPayment(payment, headers);
         Mockito.verify(paymentRepository, times(0)).save(Mockito.any(Payment.class));

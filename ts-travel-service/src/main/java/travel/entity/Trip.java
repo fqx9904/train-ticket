@@ -1,71 +1,86 @@
 package travel.entity;
 
+import edu.fudan.common.entity.TripId;
+import edu.fudan.common.util.StringUtils;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.hibernate.annotations.GenericGenerator;
 
+
+import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * @author fdse
  */
 @Data
-@Document(collection="trip")
+@Entity
+@GenericGenerator(name = "jpa-uuid", strategy = "org.hibernate.id.UUIDGenerator")
 public class Trip {
     @Valid
     @Id
+    @GeneratedValue(generator = "jpa-uuid")
+    @Column(length = 36)
+    private String id;
+
+    @Embedded
     private TripId tripId;
 
     @Valid
     @NotNull
-    private String trainTypeId;
+    private String trainTypeName;
 
     private String routeId;
 
-    private Date startingTime;
 
     @Valid
     @NotNull
-    private String startingStationId;
+    private String startStationName;
 
     @Valid
-    private String stationsId;
-
-    @Valid
-    @NotNull
-    private String terminalStationId;
+    private String stationsName;
 
     @Valid
     @NotNull
-    private Date endTime;
+    private String terminalStationName;
 
-    public Trip(TripId tripId, String trainTypeId, String startingStationId, String stationsId, String terminalStationId, Date startingTime, Date endTime) {
+    @Valid
+    @NotNull
+    private String startTime;
+
+    @Valid
+    @NotNull
+    private String endTime;
+
+    public Trip(edu.fudan.common.entity.TripId tripId, String trainTypeName, String startStationName, String stationsName, String terminalStationName, String startTime, String endTime) {
         this.tripId = tripId;
-        this.trainTypeId = trainTypeId;
-        this.startingStationId = startingStationId;
-        this.stationsId = stationsId;
-        this.terminalStationId = terminalStationId;
-        this.startingTime = startingTime;
+        this.trainTypeName = trainTypeName;
+        this.startStationName = StringUtils.String2Lower(startStationName);
+        this.stationsName = StringUtils.String2Lower(stationsName);
+        this.terminalStationName = StringUtils.String2Lower(terminalStationName);
+        this.startTime = startTime;
         this.endTime = endTime;
     }
 
-    public Trip(TripId tripId, String trainTypeId, String routeId) {
+    public Trip(TripId tripId, String trainTypeName, String routeId) {
         this.tripId = tripId;
-        this.trainTypeId = trainTypeId;
+        this.trainTypeName = trainTypeName;
         this.routeId = routeId;
-        this.startingStationId = "";
-        this.terminalStationId = "";
-        this.endTime = new Date();
+        this.startStationName = "";
+        this.terminalStationName = "";
+        this.startTime = "";
+        this.endTime = "";
     }
 
     public Trip(){
         //Default Constructor
-        this.trainTypeId = "";
-        this.startingStationId = "";
-        this.terminalStationId = "";
-        this.endTime = new Date();
+        this.trainTypeName = "";
+        this.startStationName = "";
+        this.terminalStationName = "";
+        this.startTime = "";
+        this.endTime = "";
     }
 
 }

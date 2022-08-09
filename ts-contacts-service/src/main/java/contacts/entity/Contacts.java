@@ -3,8 +3,11 @@ package contacts.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+
+import javax.persistence.*;
+
+import org.hibernate.annotations.GenericGenerator;
+
 import java.util.UUID;
 
 /**
@@ -12,21 +15,26 @@ import java.util.UUID;
  */
 @Data
 @AllArgsConstructor
-@Document(collection = "contacts")
+@Entity
+@GenericGenerator(name = "jpa-uuid", strategy = "org.hibernate.id.UUIDGenerator")
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Table(indexes = {@Index(name = "account_document_idx", columnList = "account_id, document_number, document_type", unique = true)})
 public class Contacts {
 
     @Id
-    private UUID id;
-
-    private UUID accountId;
+//    private UUID id;
+    @GeneratedValue(generator = "jpa-uuid")
+    @Column(length = 36)
+    private String id;
+    @Column(name = "account_id")
+    private String accountId;
 
     private String name;
-
+    @Column(name = "document_type")
     private int documentType;
-
+    @Column(name = "document_number")
     private String documentNumber;
-
+    @Column(name = "phone_number")
     private String phoneNumber;
 
     public Contacts() {

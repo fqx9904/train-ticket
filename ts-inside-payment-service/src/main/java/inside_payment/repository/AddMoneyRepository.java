@@ -1,6 +1,7 @@
 package inside_payment.repository;
 
 import inside_payment.entity.Money;
+//import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;

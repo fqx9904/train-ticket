@@ -1,6 +1,6 @@
 package fdse.microservice.controller;
 
-import fdse.microservice.entity.Travel;
+import edu.fudan.common.entity.Travel;
 import fdse.microservice.service.BasicService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -33,14 +35,21 @@ public class BasicController {
     @PostMapping(value = "/basic/travel")
     public HttpEntity queryForTravel(@RequestBody Travel info, @RequestHeader HttpHeaders headers) {
         // TravelResult
-        logger.info("Query for travel: {}", info.toString());
+        logger.info("[queryForTravel][Query for travel][Travel: {}]", info.toString());
         return ok(service.queryForTravel(info, headers));
+    }
+
+    @PostMapping(value = "/basic/travels")
+    public HttpEntity queryForTravels(@RequestBody List<Travel> infos, @RequestHeader HttpHeaders headers) {
+        // TravelResult
+        logger.info("[queryForTravels][Query for travels][Travels: {}]", infos);
+        return ok(service.queryForTravels(infos, headers));
     }
 
     @GetMapping(value = "/basic/{stationName}")
     public HttpEntity queryForStationId(@PathVariable String stationName, @RequestHeader HttpHeaders headers) {
         // String id
-        logger.info("Query for stationId by stationName: {}", stationName);
+        logger.info("[queryForStationId][Query for stationId by stationName][stationName: {}]", stationName);
         return ok(service.queryForStationId(stationName, headers));
     }
 
